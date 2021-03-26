@@ -1,14 +1,29 @@
 {% extends "base.html" %}
 
 {% block content %}
+<h1>Hi, {{ current_user.username }}!</h1>
+    {% if form %}
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.post.label }}<br>
+            {{ form.post(cols=32, rows=4) }}<br>
+            {% for error in form.post.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+    {% endif %}
 {%for post in posts%}
 <article class="media content-section">
-    <div class="media-body">
-        <a class="mr-2" href="#">{{post.author}}</a>
-        <small class="text-muted">{{post.date_posted}}</small>
-    </div>
-    <h2><a class="arcticle-title" href="#">{{post.title}}</a></h2>
-    <p class="article-content">{{post.content}}</p>
+    {% include '_post.html' %}
 </article>
 {%endfor%}
+{% if prev_url %}
+<a href="{{ prev_url }}">Newer posts</a>
+{% endif %}
+{% if next_url %}
+<a href="{{ next_url }}">Older posts</a>
+{% endif %}
 {% endblock content%}

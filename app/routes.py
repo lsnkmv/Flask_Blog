@@ -1,26 +1,12 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, url_for, flash, redirect, request
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, EditProfileForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm
 from app.models import User, Post
 from flask_login import login_user, current_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from datetime import datetime
 
-posts = [
-    {
-        'author': 'Corey Schafer',
-        'title': 'Blog Post 1',
-        'content': 'First post content',
-        'date_posted': 'April 20, 2018'
-    },
-    {
-        'author': 'Jane Doe',
-        'title': 'Blog Post 2',
-        'content': 'Second post content',
-        'date_posted': 'April 21, 2018'
-    }
-]
 
 @app.before_request
 def before_request():
@@ -28,10 +14,33 @@ def before_request():
         current_user.last_seen = datetime.utcnow()
         db.session.commit()
 
-@app.route('/')
-@app.route('/home')
+@app.route('/', methods=['GET', 'POST'])
+@app.route('/home', methods=['GET', 'POST'])
+@login_required
 def home():
-    return render_template('home.html', posts=posts)
+    form = PostForm()
+    if form.validate_on_submit():
+        post = Post(body=form.post.data, author=current_user)
+        db.session.add(post)
+        db.session.commit()
+        flash('Your post is now live!')
+        return redirect(url_for('home'))
+    page = request.args.get('page', 1, type=int)
+    posts = current_user.followed_posts().paginate(
+        page, app.config['POSTS_PER_PAGE'], False)
+    next_url = url_for('home', page=posts.next_num) if posts.has_next else None
+    prev_url = url_for('home', page=posts.prev_num) if posts.has_prev else None
+    return render_template("home.html", title='Home Page', form=form,
+                           posts=posts.items, next_url=next_url, prev_url=prev_url)
+
+
+@app.route('/explore')
+@login_required
+def explore():
+    page = request.args.get('page', 1, type=int)
+    posts = current_user.followed_posts().paginate(
+        page, app.config['POSTS_PER_PAGE'], False)
+    return render_template('home.html', title='Explore', posts=posts.items)
 
 
 @app.route('/about')
@@ -98,11 +107,13 @@ def logout():
 @login_required
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()
-    posts = [
-        {'author': user, 'body': 'Test post'},
-        {'author': user, 'body': 'Test post'}
-    ]
-    return render_template('user.html', title='Account', user=user, posts=posts)
+    page = request.args.get('page', 1, type=int)
+    posts = user.posts.order_by(Post.timestamp.desc()).paginate(
+        page, app.config['POSTS_PER_PAGE'], False)
+    next_url = url_for('home', page=posts.next_num) if posts.has_next else None
+    prev_url = url_for('home', page=posts.prev_num) if posts.has_prev else None
+
+    return render_template('user.html', title='Account', user=user, posts=posts.items, next_url=next_url, prev_url=prev_url)
 
 @app.route('/follow/<username>')
 @login_required
