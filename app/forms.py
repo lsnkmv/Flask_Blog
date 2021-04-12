@@ -10,20 +10,19 @@ class RegistrationForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     confirm_password = PasswordField('Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Sign In')
-    
+
     def validate_username(self, username):
         user = User.query.filter_by(username=username.data).first()
-        
+
         if user:
             raise ValidationError('The username is taken. Please choose a different one.')
-    
-    
+
     def validate_email(self, email):
         user = User.query.filter_by(email=email.data).first()
         if user:
             raise ValidationError('The email is taken. Please choose a different one.')
-    
-    
+
+
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
@@ -46,8 +45,20 @@ class EditProfileForm(FlaskForm):
             if user:
                 raise ValidationError('This username has already taken. Please use a diffetent username.')
 
+
 class PostForm(FlaskForm):
     post = TextAreaField('Say something', validators=[
         DataRequired(), Length(min=1, max=140)])
     submit = SubmitField('Submit')
-    
+
+
+class ResetPasswordRequestForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Request Password Reset')
+
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('Password', validators=[DataRequired()])
+    password2 = PasswordField(
+        'Repeat Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Request Password Reset')

@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template, url_for, flash, redirect, request
-from app import app, db
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm
-from app.models import User, Post
+from datetime import datetime
+from flask import render_template, url_for, flash, redirect, request
 from flask_login import login_user, current_user, logout_user, login_required
 from werkzeug.urls import url_parse
-from datetime import datetime
+from app import app, db
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, \
+    PostForm, ResetPasswordRequestForm, ResetPasswordForm
+from app.models import User, Post
+from app.email import send_password_reset_email
 
 
 @app.before_request
@@ -13,6 +15,7 @@ def before_request():
     if current_user.is_authenticated:
         current_user.last_seen = datetime.utcnow()
         db.session.commit()
+
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/home', methods=['GET', 'POST'])
@@ -45,7 +48,7 @@ def explore():
 
 @app.route('/about')
 def about():
-    return render_template('about.html', title = 'About')
+    return render_template('about.html', title='About')
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -60,7 +63,7 @@ def register():
         db.session.commit()
         flash(f'Account created for {form.username.data}!', 'success')
         return redirect(url_for('login'))
-    return render_template('register.html', title = 'Sign Up', form=form)
+    return render_template('register.html', title='Sign Up', form=form)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -94,7 +97,7 @@ def edit_profile():
     elif request.method == 'GET':
         form.username.data = current_user.username
         form.about_me.data = current_user.about_me 
-        return render_template('edit_profile.html', title = 'Edit profile info', form=form)
+        return render_template('edit_profile.html', title='Edit profile info', form=form)
 
 
 @app.route('/logout')
@@ -115,6 +118,7 @@ def user(username):
 
     return render_template('user.html', title='Account', user=user, posts=posts.items, next_url=next_url, prev_url=prev_url)
 
+
 @app.route('/follow/<username>')
 @login_required
 def follow(username):
@@ -130,6 +134,7 @@ def follow(username):
     flash('You are following {}!'.format(username))
     return redirect(url_for('user', username=username))
 
+
 @app.route('/unfollow/<username>')
 @login_required
 def unfollow(username):
@@ -144,4 +149,34 @@ def unfollow(username):
     db.session.commit()
     flash('You are not following {}.'.format(username))
     return redirect(url_for('user', username=username))
-    
+
+
+@app.route('/reset_password_request', methods=['GET', 'POST'])
+def reset_password_request():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    form = ResetPasswordRequestForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            send_password_reset_email(user)
+        flash('Check your email for the instructions to reset your password')
+        return redirect(url_for('login'))
+    return render_template('reset_password_request.html',
+                           title='Reset Password', form=form)
+
+
+@app.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    user = User.verify_reset_password_token(token)
+    if not user:
+        return redirect(url_for('home'))
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        user.set_password(form.password.data)
+        db.session.commit()
+        flash('Your password has been reset.')
+        return redirect(url_for('login'))
+    return render_template('reset_password.html', form=form)
