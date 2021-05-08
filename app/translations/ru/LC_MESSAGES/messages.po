@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-04-20 00:31+0300\n"
+"POT-Creation-Date: 2021-05-08 15:58+0300\n"
 "PO-Revision-Date: 2021-04-20 00:10+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -35,7 +35,7 @@ msgstr "Email"
 msgid "Password"
 msgstr "Пароль"
 
-#: app/forms.py:13 app/forms.py:31 app/routes.py:85 app/templates/login.html:5
+#: app/forms.py:13 app/forms.py:31 app/routes.py:106 app/templates/login.html:5
 msgid "Sign In"
 msgstr "Вход"
 
@@ -75,68 +75,76 @@ msgstr "Запрос на восстановление пароля"
 msgid "Repeat Password"
 msgstr "Повторите Пароль"
 
-#: app/routes.py:30
+#: app/routes.py:45
 msgid "Your post is now live!"
 msgstr "Ваш пост опубликован!"
 
-#: app/routes.py:37
+#: app/routes.py:52
 msgid "Home Page"
 msgstr "Домашняя страница"
 
-#: app/routes.py:47 app/templates/base.html:22
+#: app/routes.py:66 app/templates/base.html:22
 msgid "Explore"
 msgstr "Поиск"
 
-#: app/routes.py:52
+#: app/routes.py:73
 msgid "About"
 msgstr "Информация"
 
-#: app/routes.py:65
+#: app/routes.py:86
 msgid "Account created!"
 msgstr "Аккаунт создан!"
 
-#: app/routes.py:67
+#: app/routes.py:88
 msgid "Sign Up"
 msgstr "Регистрация"
 
-#: app/routes.py:78
+#: app/routes.py:99
 msgid "Login Unsuccessful. Please, check username and password"
 msgstr "Вход не выполнен. Проверьте логин и пароль на корректность"
 
-#: app/routes.py:101
+#: app/routes.py:122
 msgid "Edit profile info"
 msgstr "Изменить информацию в профиле"
 
-#: app/routes.py:131 app/routes.py:147
+#: app/routes.py:152 app/routes.py:168
 #, python-format
 msgid "User %(username)s not found."
 msgstr "Пользователь %(username)s не найден."
 
-#: app/routes.py:134
+#: app/routes.py:155
 msgid "You cannot follow yourself!"
 msgstr "Вы не можете подписаться на себя!"
 
-#: app/routes.py:138
+#: app/routes.py:159
 #, python-format
 msgid "You are following %(username)s!"
 msgstr "Вы подписаны на %(username)s!"
 
-#: app/routes.py:150
+#: app/routes.py:171
 msgid "You cannot unfollow yourself!"
 msgstr "Вы не можете отписаться от себя!"
 
-#: app/routes.py:154
+#: app/routes.py:175
 #, python-format
 msgid "You are not following %(username)s."
 msgstr "Вы не подписаны на %(username)s!"
 
-#: app/routes.py:167
+#: app/routes.py:188
 msgid "Check your email for the instructions to reset your password"
 msgstr "Проверьте почту, на нее высланы инструкции для восстановления пароля"
 
-#: app/routes.py:170 app/templates/reset_password.html:5
+#: app/routes.py:191 app/templates/reset_password.html:5
 msgid "Reset Password"
 msgstr "Восстановить пароль"
+
+#: app/translate.py:10
+msgid "Error: the translation service is not configured."
+msgstr "Ошибка: сервер для перевода неисправен"
+
+#: app/translate.py:20
+msgid "Error: the translation service failed."
+msgstr "Ошибка: не удалось перевести текст"
 
 #: app/templates/404.html:4
 msgid "Not Found"
@@ -163,6 +171,10 @@ msgstr "Давайте перейдем на стартовую страницу
 msgid "%(username)s said %(when)s"
 msgstr "%(username)s сказал %(when)s"
 
+#: app/templates/_post.html:25
+msgid "Translate"
+msgstr "Перевести"
+
 #: app/templates/base.html:4
 msgid "Welcome to Flsk Blog"
 msgstr "Добро пожаловать в Flask Blog"
@@ -182,6 +194,10 @@ msgstr "Профиль"
 #: app/templates/base.html:29
 msgid "Logout"
 msgstr "Выход"
+
+#: app/templates/base.html:66
+msgid "Error: Could not contact server."
+msgstr "Ошибка: проблема с соединением к серверу"
 
 #: app/templates/edit_profile.html:6
 msgid "Edit Profile"

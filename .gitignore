@@ -9,6 +9,7 @@ __pycache__/
 messages.pot
 
 # Packages
+.env
 .vscode/
 env/
 logs/

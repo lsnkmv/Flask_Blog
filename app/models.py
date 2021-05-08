@@ -1,10 +1,11 @@
-from app import app, db, login_manager
 from datetime import datetime
-from flask_login import UserMixin
-from werkzeug.security import generate_password_hash, check_password_hash
+import jwt
 from hashlib import md5
 from time import time
-import jwt
+from flask import current_app
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
+from app import db, login_manager
 
 
 @login_manager.user_loader
@@ -13,16 +14,18 @@ def load_user(user_id):
 
 
 followers = db.Table('followers',
-    db.Column('follower_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('followed_id', db.Integer, db.ForeignKey('user.id'))
-)
+                     db.Column('follower_id', db.Integer,
+                               db.ForeignKey('user.id')),
+                     db.Column('followed_id', db.Integer,
+                               db.ForeignKey('user.id')))
 
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
+    image_file = db.Column(db.String(20), nullable=False,
+                           default='default.jpg')
     password_hash = db.Column(db.String(128))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
     about_me = db.Column(db.String(140))
@@ -42,12 +45,12 @@ class User(db.Model, UserMixin):
     def get_reset_password_token(self, expires_in=600):
         return jwt.encode(
             {'reset_password': self.id, 'exp': time() + expires_in},
-            app.config['SECRET_KEY'], algorithm='HS256')
+            current_app.config['SECRET_KEY'], algorithm='HS256')
 
     @staticmethod
     def verify_reset_password_token(token):
         try:
-            id = jwt.decode(token, app.config['SECRET_KEY'],
+            id = jwt.decode(token, current_app.config['SECRET_KEY'],
                             algorithms=['HS256'])['reset_password']
         except:
             return
@@ -87,6 +90,7 @@ class Post(db.Model):
     body = db.Column(db.String(140))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    language = db.Column(db.String(5))
 
     def __repr__(self):
-        return f"Post {self.body}" 
+        return f"Post {self.body}"
